@@ -4,6 +4,8 @@
  *   WAKA.reading.estimate(text) -> Promise<string>  ひらがなの読み
  *       仮名だけなら即座にひらがなへ揃えて返す。
  *       漢字があれば kuromoji を初回だけ CDN から読み込んで推定する。
+ *       http(s) では Web Worker（js/reading-worker.js）で辞書の読み込み・展開と解析をする
+ *       （主スレッドを止めない）。file:// や Worker が動かないときは主スレッドで動かす。
  *       読込失敗・10 秒タイムアウト時は reject（画面は手入力に切り替える）。
  *   WAKA.reading.state   'idle' | 'loading' | 'ready' | 'failed'
  *   WAKA.reading.preload()  先読み（失敗しても何もしない）
@@ -25,6 +27,9 @@
   var W = window.WAKA = window.WAKA || {};
   var BASE = 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/';
   var TIMEOUT_MS = 10000;
+  // Worker のスクリプト（reading.js と同じ場所・同じ ?v=）
+  var cur = typeof document !== 'undefined' && document.currentScript;
+  var WORKER_URL = cur && cur.src ? cur.src.replace(/reading\.js(\?|$)/, 'reading-worker.js$1') : 'js/reading-worker.js';
 
   var R = { state: 'idle' };
   var tokenizerPromise = null;
@@ -42,17 +47,68 @@
     });
   }
 
-  function getTokenizer() {
-    if (tokenizerPromise) return tokenizerPromise;
-    R.state = 'loading';
-    var work = loadScript(BASE + 'build/kuromoji.js').then(function () {
+  // 主スレッドで kuromoji を動かす（file:// など Worker が使えないとき）。辞書の展開中は画面が止まる
+  function mainTokenizer() {
+    return loadScript(BASE + 'build/kuromoji.js').then(function () {
       return new Promise(function (resolve, reject) {
         window.kuromoji.builder({ dicPath: BASE + 'dict/' }).build(function (err, tk) {
           if (err || !tk) reject(err || new Error('辞書を読み込めません'));
-          else resolve(tk);
+          else resolve({ tokenize: function (s) { return Promise.resolve(tk.tokenize(s)); } });
         });
       });
     });
+  }
+
+  // Web Worker で kuromoji を動かす（http(s) のとき。辞書の読み込み・展開で主スレッドを止めない）
+  function workerTokenizer() {
+    return new Promise(function (resolve, reject) {
+      var w;
+      try { w = new Worker(WORKER_URL); } catch (e) { reject(e); return; }
+      var seq = 0, waiting = {}, ready = false;
+      function fail(msg) {
+        Object.keys(waiting).forEach(function (k) { waiting[k].reject(new Error(msg)); });
+        waiting = {};
+        try { w.terminate(); } catch (e) { /* 無視 */ }
+        if (!ready) reject(new Error(msg));
+      }
+      w.onmessage = function (ev) {
+        var m = ev.data || {};
+        if (m.type === 'ready') {
+          ready = true;
+          resolve({
+            tokenize: function (s) {
+              return new Promise(function (res, rej) {
+                var id = ++seq;
+                waiting[id] = { resolve: res, reject: rej };
+                w.postMessage({ id: id, text: s });
+              });
+            }
+          });
+          return;
+        }
+        if (m.type === 'error') { fail(m.message || '辞書を読み込めません'); return; }
+        var p = waiting[m.id];
+        if (!p) return;
+        delete waiting[m.id];
+        if (m.error) p.reject(new Error(m.error)); else p.resolve(m.tokens || []);
+      };
+      w.onerror = function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();   // コンソールに出さない（呼び出し側で扱う）
+        fail('Worker で読み推定を動かせません');
+      };
+      w.postMessage({ base: BASE });
+    });
+  }
+
+  function canUseWorker() {
+    return typeof window.Worker === 'function' && /^https?:$/.test(location.protocol);
+  }
+
+  function getTokenizer() {
+    if (tokenizerPromise) return tokenizerPromise;
+    R.state = 'loading';
+    // Worker が動かなければ主スレッドで読み直す
+    var work = canUseWorker() ? workerTokenizer().catch(function () { return mainTokenizer(); }) : mainTokenizer();
     var timeout = new Promise(function (_, reject) {
       setTimeout(function () { reject(new Error('timeout')); }, TIMEOUT_MS);
     });
@@ -161,7 +217,7 @@
     if (R.state === 'failed') {
       try { return Promise.resolve(fallback()); } catch (e) { return Promise.reject(e); }
     }
-    return getTokenizer().then(function (tk) { return readTokens(tk.tokenize(src)); }, fallback);
+    return getTokenizer().then(function (tk) { return tk.tokenize(src); }).then(readTokens, fallback);
   };
 
   // テスト用：形態素列（{surface_form, reading}）から読みを組み立てる

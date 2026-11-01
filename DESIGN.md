@@ -30,6 +30,7 @@ D:\waka_maker\
   js/app.js             起動・ルーティング・画面切替
   js/mora.js            音数カウント (純関数。テスト容易に)
   js/reading.js         読み推定 (kuromoji の遅延読込とフォールバック)
+  js/reading-worker.js  読み推定の Web Worker (kuromoji の辞書の読み込み・解析を別スレッドで、8 章)
   js/store.js           localStorage の読み書き (作品帳・下書き・設定)
   js/easy-gen.js        かんたんモードの歌の生成と大意の組み立て (純関数。Node でも読める、9.2・10.2)
   js/view-easy.js       かんたんモード (9 章)
@@ -404,6 +405,7 @@ A は `WAKA.render` / `WAKA.share` が未定義でも落ちないように (ボ�
   - 一覧は スマホ 1 列・560px〜 2 列・720px〜 3 列。骨組みは 6 枚 (prefers-reduced-motion なら点滅しない)。「今日のお題だけ」は aria-pressed のトグル (日付つき)。`#/minna/odai` で開くと「今日のお題だけ」から始まる (配信用)。表示中は 60 秒ごとに 1 ページ目を読み直し、新着だけを先頭に差し込む (フォーカス・スクロールは動かさない。モーダル表示中・タブが裏・読み込み中は休む。失敗は黙る)。
   - 使い方の「みんなの和歌」の節は minna.api があるときだけ出す。規約の節は常に出す (法的な文面は機能の有無で変えない)。下タブの文字はスマホで .68rem (10.9px)、PC のタブの左右の余白を .8rem → .6rem。
   - 確認: モック API (Node、302 を 1 回挟む・契約どおりの検査・メモリ保持) と headless Chrome の E2E minna 234 項目 (API 空でタブ非表示と準備中・一覧と骨組み・もっと見る・今日のお題だけ・失敗 4 種 (通信・JSON でない・ok:false・タイムアウト) と もう一度・控えの先出し・投稿 (確認モーダル・送信中・成功・投稿済み・mine・text/plain でプリフライトなし)・ng/rate/dup/server/通信失敗の案内・前検査・取り下げ (2 段階・forbidden)・閲覧モード・写す・なぞる・自動更新・規約と使い方・Tab で全操作に到達・コントラスト・360 幅・PC・file://)、既存 E2E 6 本 (タブ数の検査を見えるタブだけに直した) でコンソールエラー 0。画像は _dev/shots/minna_*.png。
+- 2026-11-01 性能: 「じっくりで歌ことばを開くと固まる」の対策。原因は歌ことばの一覧ではなく、じっくりを開くと先読みが始まる kuromoji の辞書の読み込み (XHR → gunzip → 配列化) が主スレッドで動き、数秒間画面が止まっていたこと (CPU 6 倍絞りで長いタスク 9 回・最大 1355ms・計 3.5 秒。開いた直後に歌ことばを押すとこれに重なる)。**http(s) では kuromoji を Web Worker (`js/reading-worker.js`、importScripts で jsDelivr から読む) で動かす**。主スレッドとは postMessage で形態素を受け渡す。file:// と Worker が作れない・動かないときはいままでどおり主スレッドで動かす (10 秒のタイムアウトは共通)。API (`estimate` / `tokenize` / `preload` / `preloadIdle` / `state`) は変えていない。Worker のスクリプトは reading.js と同じ ?v= で読み、sw.js の PRECACHE にも入れた。あわせて歌ことばの一覧は初めて開いたときに作り、検索は 150ms 待ってから描き直す。`.kotoba-item` に `content-visibility: auto` (見えていない語の配置・文字組みを後回しにする。見た目は同じ)。確認: 同じ計測で じっくりを開く 最大 1355ms → 0〜69ms、歌ことばの検索 249ms → 0 (長いタスクなし)、開いて 1 秒後に歌ことばを押す操作は 長いタスク 9 回・最大 1122ms → 1 回・53ms。
 
 ## 9. かんたんモード `#/easy` (第 2 弾・初期画面)
 

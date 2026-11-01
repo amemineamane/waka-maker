@@ -102,17 +102,23 @@
       var b = el('button', { type: 'button', class: 'tab', role: 'tab', 'aria-selected': String(t === kotobaTab), text: t });
       b.addEventListener('click', function () {
         kotobaTab = t;
-        kotobaQuery = ''; search.value = '';
+        kotobaQuery = ''; search.value = ''; clearTimeout(searchTimer);
         [].forEach.call(tabs.children, function (c) { c.setAttribute('aria-selected', String(c === b)); });
         kotobaList(list);
       });
       tabs.appendChild(b);
     });
     var search = el('input', { type: 'search', class: 'kotoba-search', placeholder: '語・読み・意味でさがす', 'aria-label': '歌ことばを検索' });
-    search.addEventListener('input', function () { kotobaQuery = search.value; kotobaList(list); });
+    // 検索は打ち終わりを待って描き直す（1 文字ごとに一覧を作り直さない）
+    var searchTimer = null;
+    search.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () { kotobaQuery = search.value; kotobaList(list); }, 150);
+    });
     targetLabel = el('strong', { text: NUM[active] });
-    kotobaList(list);
-    return el('details', { class: 'panel kotoba' }, [
+    // 一覧は初めて開いたときに作る（閉じたままなら作らない）
+    var built = false;
+    var details = el('details', { class: 'panel kotoba' }, [
       el('summary', { class: 'panel-summary' }, [el('span', { text: '歌ことば' }), el('span', { class: 'muted small', text: '季語・歌語・枕詞から選んで入れる' })]),
       el('div', { class: 'panel-body' }, [
         tabs, search,
@@ -120,6 +126,10 @@
         list
       ])
     ]);
+    details.addEventListener('toggle', function () {
+      if (details.open && !built) { built = true; kotobaList(list); }
+    });
+    return details;
   }
 
   /* ---------- お手本 ---------- */
