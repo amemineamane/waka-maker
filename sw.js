@@ -19,7 +19,7 @@
 'use strict';
 
 /* tools/bump-version.mjs が書き換える行（形を変えないこと） */
-const CACHE_VERSION = '10';
+const CACHE_VERSION = '11';
 const CACHE_NAME = 'waka-maker-v' + CACHE_VERSION;
 
 /* インストール時に取っておくファイル（?v= は付けない。照合は ignoreSearch）。ファイルを足したらここにも足す */

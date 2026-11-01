@@ -450,6 +450,11 @@
     paintSubjects(box);
     return el('div', { class: 'q' }, [
       qHead('Q2', '何を見た・思った？', season ? season + 'の題材を先頭に' : null),
+      // 色の意味（季節を選んだときだけ）
+      season ? el('p', { class: 'q-legend' }, [
+        el('span', { class: 'legend-item' }, [el('span', { class: 'legend-sw in-season', 'aria-hidden': 'true' }), season + 'に合う題材']),
+        el('span', { class: 'legend-item' }, [el('span', { class: 'legend-sw', 'aria-hidden': 'true' }), '通年・ほかの季節（えらんでも作れます）'])
+      ]) : null,
       search, box,
       el('p', { class: 'q-hint', text: 'えらばなければ、おまかせで選びます。' })
     ]);
