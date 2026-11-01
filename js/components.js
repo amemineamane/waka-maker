@@ -380,18 +380,26 @@
       return box;
     }
 
+    // 描画は 1 回ずつ。描いている途中に切替が続いたら、描き終わってから最新の状態で 1 回だけ描き直す
+    // （連打のたびに Canvas 全体を描かない）。共有用の PNG は最後の描画から少し待って作る
+    var again = false, blobTimer = null, gen = 0;
     function redraw() {
       preview.setAttribute('data-layout', state.layout);
       if (!canDraw) return;
       canvas.__wakaBlob = null;
+      clearTimeout(blobTimer);
+      gen++;
+      if (drawing) { again = true; return; }
       try {
         var dopt = { layout: state.layout, palette: state.palette, scale: 1, font: state.font, seal: state.seal };
         if (state.meaningInImage && data.meaning.trim()) dopt.meaning = data.meaning.trim();
         var r = Promise.resolve(R.draw(canvas, data, dopt));
+        var myGen = gen;
         drawing = r;
         r.then(function () {
           if (drawing !== r) return;
           drawing = null;
+          if (again) { again = false; redraw(); return; }
           // 選んだ書体を読み込めなかったとき（明朝・OS の明朝で描いた）
           var used = canvas.__wakaFont;
           if (used && used !== state.font && state.font !== 'shippori' && !fontWarned) {
@@ -399,10 +407,20 @@
             ui.toast('書体を読み込めなかったので、明朝で描きました');
           }
           // 画像つき共有は click 内で同期的に navigator.share を呼べるよう PNG を先に作っておく
-          if (canShareImg && has(R, 'toBlob')) R.toBlob(canvas).then(function (b) { if (!drawing && b) canvas.__wakaBlob = b; });
+          if (canShareImg && has(R, 'toBlob')) {
+            blobTimer = setTimeout(function () {
+              if (drawing || myGen !== gen) return;
+              R.toBlob(canvas).then(function (b) { if (!drawing && myGen === gen && b) canvas.__wakaBlob = b; });
+            }, 400);
+          }
         },
-          function () { if (drawing === r) drawing = null; ui.toast('画像を描けませんでした', 'error'); });
-      } catch (e) { drawing = null; ui.toast('画像を描けませんでした', 'error'); }
+          function () {
+            if (drawing !== r) return;
+            drawing = null;
+            if (again) { again = false; redraw(); return; }
+            ui.toast('画像を描けませんでした', 'error');
+          });
+      } catch (e) { drawing = null; again = false; ui.toast('画像を描けませんでした', 'error'); }
     }
 
     preview.appendChild(canDraw ? canvas : htmlPreview());
@@ -640,7 +658,7 @@
     handle = ui.modal(opts.title || 'できあがり', body, {
       wide: true,
       onClose: function () {
-        clearTimeout(meanTimer);
+        clearTimeout(meanTimer); clearTimeout(blobTimer);
         // 書きかけの意味を取りこぼさない
         if (saveMeanTimer) { clearTimeout(saveMeanTimer); W.store.gallery.save({ id: savedId, meaning: data.meaning.trim() }); }
         if (opts.onClose) opts.onClose();

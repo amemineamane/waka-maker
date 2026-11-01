@@ -239,7 +239,8 @@ details[open] > .panel-summary > span:first-child::before { content: "－"; }
 .slot-tools .btn-icon { width: 40px; height: 40px; }
 .mix-actions { display: grid; gap: 8px; }
 .choice-list { display: grid; gap: 6px; }
-.choice { display: grid; text-align: left; padding: .5rem .8rem; min-height: 44px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+.choice { display: grid; text-align: left; padding: .5rem .8rem; min-height: 44px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer;
+  content-visibility: auto; contain-intrinsic-size: auto 64px; /* 見えていない候補の配置は後回し（一覧を開く重さ対策） */ }
 .choice.current { border-color: var(--accent); border-left-width: 3px; }
 
 /* ---------- かんたんモード ---------- */
@@ -751,6 +752,7 @@ button.fill-head { cursor: pointer; }
 .mn-card {
   display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px 14px 12px;
   background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+  content-visibility: auto; contain-intrinsic-size: auto 300px; /* 見えていない歌の縦書き組版は後回し（一覧の重さ対策） */
 }
 .mn-card.is-mine { border-left: 3px solid var(--accent); }
 .mn-poem-wrap { display: flex; justify-content: center; padding: 6px 0 4px; cursor: pointer; }
