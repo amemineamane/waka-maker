@@ -399,11 +399,18 @@
       return (b.inSeason.length > 0) - (a.inSeason.length > 0) || a.i - b.i;
     });
   }
+  // 季節に合う題材には小さく季節の印（「秋」など）を付ける
   function subjectChip(s, inSeason) {
+    // 印は CSS の ::after（data-season）で描く。本文のテキストは題材名だけにしておく
+    var season = genSeason();
     return button(s.label, function () {
       st.subject = s.id;
       goStep(3);
-    }, 'chip' + (inSeason ? ' in-season' : ''), { 'aria-pressed': String(st.subject === s.id) });
+    }, 'chip' + (inSeason ? ' in-season' : ''), {
+      'aria-pressed': String(st.subject === s.id),
+      'data-season': inSeason && season ? season : null,
+      'aria-label': inSeason && season ? s.label + '（' + season + 'に合う題材）' : null
+    });
   }
   function paintSubjects(box) {
     var season = genSeason();
@@ -450,10 +457,10 @@
     paintSubjects(box);
     return el('div', { class: 'q' }, [
       qHead('Q2', '何を見た・思った？', season ? season + 'の題材を先頭に' : null),
-      // 色の意味（季節を選んだときだけ）
-      season ? el('p', { class: 'q-legend' }, [
-        el('span', { class: 'legend-item' }, [el('span', { class: 'legend-sw in-season', 'aria-hidden': 'true' }), season + 'に合う題材']),
-        el('span', { class: 'legend-item' }, [el('span', { class: 'legend-sw', 'aria-hidden': 'true' }), '通年・ほかの季節（えらんでも作れます）'])
+      // 印の意味（季節を選んだときだけ）
+      season ? el('p', { class: 'q-note' }, [
+        el('span', { class: 'chip-season chip-season-inline', 'aria-hidden': 'true', text: season }),
+        'の印がついた題材が' + season + 'に合います。ほかの題材もえらべます。'
       ]) : null,
       search, box,
       el('p', { class: 'q-hint', text: 'えらばなければ、おまかせで選びます。' })

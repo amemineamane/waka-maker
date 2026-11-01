@@ -294,10 +294,14 @@ details[open] > .panel-summary > span:first-child::before { content: "－"; }
 .q-no { color: var(--accent); font-size: .95rem; letter-spacing: .05em; }
 .q-sub { font-family: var(--gothic); font-weight: 500; font-size: .8rem; color: var(--ink-2); }
 .q-hint { font-size: .82rem; color: var(--ink-2); margin: 6px 0 0; }
-.q-legend { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: -4px 0 8px; font-size: .8rem; color: var(--ink-2); }
-.legend-item { display: inline-flex; align-items: center; gap: .35em; }
-.legend-sw { display: inline-block; width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
-.legend-sw.in-season { border-color: #c9a79f; background: #fdf8f6; }
+.q-note { margin: -4px 0 8px; font-size: .8rem; color: var(--ink-2); line-height: 1.6; }
+.chip-season, .chip[data-season]::after {
+  font-family: var(--gothic); font-weight: 500; font-size: .68rem; line-height: 1.4; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 3px; padding: 0 .3em; margin-left: .1em; align-self: center;
+}
+.chip[data-season]::after { content: attr(data-season); }
+.chip[aria-pressed="true"]::after { color: var(--paper); border-color: var(--paper); }
+.chip-season-inline { display: inline-block; vertical-align: middle; margin: 0 .2em 0 0; }
 .q-grid { display: grid; gap: 8px; }
 .season-grid { grid-template-columns: repeat(4, 1fr); }
 .q-btn {
