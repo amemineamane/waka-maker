@@ -1,0 +1,20 @@
+{
+  "name": "和歌メイカー",
+  "short_name": "和歌メイカー",
+  "description": "えらぶだけで和歌が一首。音数を数えて、短冊・色紙の縦書き画像にして X で共有できる無料サイト",
+  "lang": "ja",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./#/easy",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f1e7",
+  "theme_color": "#f6f1e7",
+  "categories": ["education", "entertainment"],
+  "icons": [
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

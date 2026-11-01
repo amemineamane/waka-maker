@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>render.js 単体確認</title>
+<!-- render.js / share.js の単体確認ページ (file:// で開ける)。?only=layout,palette,歌番号 で 1 枚だけ原寸表示 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&display=swap">
+<style>
+  body { margin: 0; padding: 16px; background: #e9e4da; font-family: sans-serif; color: #2b2b2b; }
+  h2 { font-size: 16px; margin: 24px 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  figure { margin: 0; }
+  figcaption { font-size: 12px; margin-top: 4px; }
+  canvas { display: block; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .tanzaku canvas { height: 400px; }
+  .shikishi canvas { height: 300px; }
+  .card canvas { height: 158px; }
+  pre { background: #fff; padding: 8px; font-size: 12px; white-space: pre-wrap; }
+  body.only { padding: 0; background: #000; }
+  body.only canvas { height: auto !important; box-shadow: none; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script src="../data/site.js"></script>
+<script src="../js/render.js"></script>
+<script src="../js/share.js"></script>
+<script>
+  var SAMPLES = [
+    { ku: ['春すぎて', '夏きにけらし', '白妙の', '衣干すてふ', '天の香具山'],
+      kana: ['はるすぎて', 'なつきにけらし', 'しろたへの', 'ころもほすてふ', 'あまのかぐやま'], author: '持統天皇' },
+    // 字余り (8 音) の古歌
+    { ku: ['ちはやぶる', '神代もきかず', '竜田川', 'からくれなゐに', '水くくるとは'],
+      kana: ['ちはやぶる', 'かみよもきかず', 'たつたがは', 'からくれなゐに', 'みづくくるとは'], author: '在原業平朝臣' },
+    // 長音・小書き仮名・句読点・長い句 (11 文字) の確認用
+    { ku: ['朝ぼらけ、', 'チョコレートをもうひとつ', 'つまみつつ', 'ちょっとだけよと', 'ゆうべも言った。'],
+      kana: [], author: '雨峰あまね' }
+  ];
+  var R = WAKA.render;
+  var out = document.getElementById('out');
+  var q = new URLSearchParams(location.search).get('only');
+
+  if (q) {
+    // 1 枚だけ原寸で描く (スクリーンショット用)
+    var p = q.split(',');
+    document.body.className = 'only';
+    var c = document.createElement('canvas');
+    out.appendChild(c);
+    R.draw(c, SAMPLES[+p[2] || 0], { layout: p[0], palette: p[1] }).then(function () {
+      // フォントが読めたかを title に出す (headless 確認用)
+      document.title = 'DONE font=' + document.fonts.check('500 16px "Shippori Mincho"', '春');
+    });
+  } else {
+    var jobs = [];
+    SAMPLES.forEach(function (poem, si) {
+      R.layouts.forEach(function (lay) {
+        var h = document.createElement('h2');
+        h.textContent = '歌 ' + (si + 1) + ' / ' + lay.name + ' (' + lay.id + ')';
+        out.appendChild(h);
+        var row = document.createElement('div');
+        row.className = 'row ' + lay.id;
+        out.appendChild(row);
+        R.palettes.forEach(function (pal) {
+          var fig = document.createElement('figure');
+          var c = document.createElement('canvas');
+          var cap = document.createElement('figcaption');
+          cap.textContent = pal.name + ' — クリックで保存';
+          c.onclick = function () { R.download(c); };
+          fig.appendChild(c); fig.appendChild(cap); row.appendChild(fig);
+          jobs.push(R.draw(c, poem, { layout: lay.id, palette: pal.id }));
+        });
+      });
+    });
+    // share.js の出力確認
+    var pre = document.createElement('pre');
+    pre.textContent = 'share.text:\n' + WAKA.share.text(SAMPLES[0]) +
+      '\n\nshare.xUrl:\n' + WAKA.share.xUrl(SAMPLES[0]) +
+      '\n\ncanShareImage: ' + WAKA.share.canShareImage() +
+      '\nfilename: ' + R.filename() +
+      '\nlayouts: ' + JSON.stringify(R.layouts) + '\npalettes: ' + JSON.stringify(R.palettes);
+    out.appendChild(pre);
+    Promise.all(jobs).then(function () { document.title = 'DONE'; });
+  }
+</script>
+</body>
+</html>
