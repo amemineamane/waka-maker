@@ -389,7 +389,7 @@
     ctx.restore();
   }
   function drawSiteName(ctx, W, y, fs, pal) {
-    var name = (WAKA.site && WAKA.site.name) || '和歌メイカー';
+    var name = (WAKA.site && WAKA.site.name) || '和歌メーカー';
     ctx.font = '400 ' + fs + 'px ' + FONT_STACK;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
@@ -535,7 +535,7 @@
     var pal = find(palettes, options.palette);
     var scale = options.scale > 0 ? options.scale : 1;
     var ku = kuOf(poem);
-    var siteName = (WAKA.site && WAKA.site.name) || '和歌メイカー';
+    var siteName = (WAKA.site && WAKA.site.name) || '和歌メーカー';
     // 短冊には意味を描かない (狭いため)
     var meaning = lay.id === 'tanzaku' ? '' : String(options.meaning || '').trim();
     var allText = ku.join('') + String(poem.author || '') + siteName + meaning + '…';

@@ -337,7 +337,7 @@
     return Array.isArray(t) && t.length ? t : fallback;
   }
 
-  var ODAI_TAG = '和歌メイカー_今日のお題';
+  var ODAI_TAG = '和歌メーカー_今日のお題';
   ui.ODAI_TAG = ODAI_TAG;
 
   /* ---------- 完成画面 ---------- */

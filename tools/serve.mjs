@@ -63,5 +63,5 @@ server.on('error', (e) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`和歌メイカー: http://localhost:${PORT}/  （止めるときは Ctrl+C）`);
+  console.log(`和歌メーカー: http://localhost:${PORT}/  （止めるときは Ctrl+C）`);
 });

@@ -17,7 +17,7 @@
   var ROUTES = ['easy', 'compose', 'mix', 'gallery', 'minna', 'help', 'terms'];
   var current = null;
   // トップの <title>（index.html の <title> と同じ文面）
-  var TOP_TITLE = document.title || '和歌メイカー';
+  var TOP_TITLE = document.title || '和歌メーカー';
 
   function fatal(msg) {
     var app = document.getElementById('app');
@@ -54,7 +54,7 @@
       else a.removeAttribute('aria-current');
       if (a.getAttribute('role') === 'tab') a.setAttribute('aria-selected', String(on));
     });
-    var site = (W.site && W.site.name) || '和歌メイカー';
+    var site = (W.site && W.site.name) || '和歌メーカー';
     document.title = name === 'easy' ? TOP_TITLE : view.title + '｜' + site;
     window.scrollTo(0, 0);
     if (window.gtag) window.gtag('event', 'page_view', { page_path: '/' + name, page_title: document.title });
@@ -100,7 +100,7 @@
   function init() {
     if (!W.mora || !W.store || !W.ui || !W.reading) { fatal('js/ の部品（mora / store / components / reading）が読み込まれていません。'); return; }
     if (!W.views || ROUTES.some(function (r) { return !W.views[r]; })) { fatal('js/view-*.js が読み込まれていません。'); return; }
-    if (!W.site) W.site = { name: '和歌メイカー', hashtags: [], author: {}, analytics: {} };
+    if (!W.site) W.site = { name: '和歌メーカー', hashtags: [], author: {}, analytics: {} };
 
     // ヘッダー・フッターのサイト名
     [].forEach.call(document.querySelectorAll('[data-site-name]'), function (n) { n.textContent = W.site.name; });

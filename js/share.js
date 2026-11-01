@@ -2,7 +2,7 @@
 // 公開: WAKA.share = { text, textWithMeaning, xUrl, openX, copyText, canShareImage, shareImage }
 // X の投稿文 (text) には意味 (大意) を入れない。本文コピーは textWithMeaning (1 行空けて意味)。
 // URL とハッシュタグは data/site.js (WAKA.site) から取る。無ければ空で組み立てる。
-// opts.hashtags (配列) を渡すと site のハッシュタグの後ろに足す (今日のお題の `和歌メイカー_今日のお題` など、DESIGN 12-2)。
+// opts.hashtags (配列) を渡すと site のハッシュタグの後ろに足す (今日のお題の `和歌メーカー_今日のお題` など、DESIGN 12-2)。
 (function () {
   'use strict';
   var WAKA = (window.WAKA = window.WAKA || {});

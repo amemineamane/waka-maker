@@ -1,5 +1,5 @@
 /**
- * 和歌メイカー「みんなの和歌」API (Google Apps Script ウェブアプリ)
+ * 和歌メーカー「みんなの和歌」API (Google Apps Script ウェブアプリ)
  *
  * 何をするか:
  *   スプレッドシートを置き場にして、和歌の投稿 (post)・一覧 (list)・取り下げ (delete)・

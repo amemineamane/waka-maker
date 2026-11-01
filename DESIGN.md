@@ -1,4 +1,4 @@
-# 和歌メイカー — 設計書 (正本)
+# 和歌メーカー — 設計書 (正本)
 
 誰でも気軽に和歌 (五・七・五・七・七) を作って、画像にして、X で共有できる Web サイト。
 制作者は 雨峰あまね (ほんのり古典系 VTuber)。無料で公開する。販売はしない。
@@ -86,7 +86,7 @@ D:\waka_maker\
   - `easyGen.todayTheme(easyGen.jstDate())` で決める。日本時間の日付 'YYYY-MM-DD' を FNV-1a でハッシュしたシードの乱数 (mulberry32) なので、同じ日なら誰でも同じ。題材は その月の季節 (3〜5 春・6〜8 夏・9〜11 秋・12〜2 冬) の題材から 7 割・通年の題材から 3 割、気持ちは全体から。
   - タップで Q1 (題材の季節。その月の季節を含めばそれ、通年なら「問わない」、ほかは題材の最初の季節)・Q2・Q3 を埋めて、そのまま候補 3 首へ (step は 4。ことばは st.words のまま)。候補の上に「今日のお題」の印。「ほかの候補」でもお題のまま、質問から「一首つくる」で作り直すとお題ではなくなる。
   - `waka.easy.odai` (候補を作った日付) → 「これにする」で `work.odai` へ。完成画面は `work.odai` が今日の日付のときだけ `ui.finish(…, {odai: true})`。
-  - 完成画面: 「X で共有」の直下にチェック「今日のお題として投稿 (#和歌メイカー_今日のお題)」(既定オン)。オンなら `share.openX(poem, {hashtags: ['和歌メイカー_今日のお題']})` (site.js の hashtags の後ろに足す。画像つき共有も同じ)。
+  - 完成画面: 「X で共有」の直下にチェック「今日のお題として投稿 (#和歌メーカー_今日のお題)」(既定オン)。オンなら `share.openX(poem, {hashtags: ['和歌メーカー_今日のお題']})` (site.js の hashtags の後ろに足す。画像つき共有も同じ)。
 - 読み推定の先読み (12-8): じっくりを開いたとき・仕上げの「自分の言葉で書く」を開いたとき・「ふだんの言葉から」を開いたときに `reading.preloadIdle()` (requestIdleCallback、無ければ 1.2 秒後の setTimeout で kuromoji を読み始める)。かんたんの質問〜候補・穴埋めでは読まない。
 
 ### 3.1 じっくりモード `#/compose` (旧 手作り)
@@ -229,10 +229,10 @@ D:\waka_maker\
 
 ```js
 window.WAKA.site = {
-  name: '和歌メイカー',
+  name: '和歌メーカー',
   url: 'https://amemineamane.github.io/waka-maker/',   // 末尾 /
   description: '五・七・五・七・七を入れるだけ。音数を数えて、縦書きの画像にして、気軽に和歌が作れるサイト',
-  hashtags: ['和歌メイカー'],
+  hashtags: ['和歌メーカー'],
   author: { name: '雨峰あまね', role: 'ほんのり古典系 VTuber', x: 'https://x.com/AmemineAmane',
             youtube: 'https://www.youtube.com/@AmemineAmane', booth: 'https://amemineamane.booth.pm/' },
   analytics: { ga4: '' }   // 空なら読み込まない
@@ -339,7 +339,7 @@ Node で `data/*.js` を読み (window を模した sandbox で eval)、次を�
   - sw.js は network-first (kobun_app と同じ): 同じオリジンの GET だけ、毎回ネットを先に見て取れたらキャッシュを更新、オフラインのときだけキャッシュ (`ignoreSearch`、画面遷移は index.html)。Google Fonts・kuromoji (辞書が大きい)・解析は素通し。install で主要ファイルを precache し skipWaiting、activate で古い `waka-maker-v*` を消して clients.claim (network-first なので入れ替えても画面の中身は変わらない)。
   - 登録は js/app.js が load 後に、`location.protocol` が http / https のときだけ。file:// では登録しない。
   - **ファイルを足したら sw.js の PRECACHE にも足す**。`node tools/bump-version.mjs` が `CACHE_VERSION` を ?v=N と同じ数にそろえる。
-- **SEO** (12-7): `<title>`「和歌メイカー｜えらぶだけで和歌が一首、縦書き画像で共有」、description は 質問に答えるだけ・言いかえ・音数・縦書き画像・今日のお題・作品帳 を 100 字程度で。og:title / twitter:title は「和歌メイカー — えらぶだけで、和歌が一首」、og:locale ja_JP、`<link rel=canonical>`、JSON-LD (`WebApplication`、無料の Offer、author は制作者と sameAs)。`robots.txt` (全許可 + Sitemap)・`sitemap.xml` (トップ 1 件、URL は data/site.js と同じ)。ハッシュの画面は別 URL にしない。
+- **SEO** (12-7): `<title>`「和歌メーカー｜えらぶだけで和歌が一首、縦書き画像で共有」、description は 質問に答えるだけ・言いかえ・音数・縦書き画像・今日のお題・作品帳 を 100 字程度で。og:title / twitter:title は「和歌メーカー — えらぶだけで、和歌が一首」、og:locale ja_JP、`<link rel=canonical>`、JSON-LD (`WebApplication`、無料の Offer、author は制作者と sameAs)。`robots.txt` (全許可 + Sitemap)・`sitemap.xml` (トップ 1 件、URL は data/site.js と同じ)。ハッシュの画面は別 URL にしない。
   - data/site.js の description (使い方のリードに出る) は従来の文のまま。meta の description は index.html だけ新しい文にした (サイトの説明文を変えるときは両方を見る)。
 
 ## 7. 作業分担 (初版)
@@ -550,7 +550,7 @@ window.WAKA.easy = {
 第 4 弾 (11 章) 完了後に着手。優先順。
 
 1. **古典としての正確さの監査** (データ): easy.js・parts.js の全句について、古語の文法 (活用・係り結び・助動詞の接続)、歴史的仮名遣い、語の意味 (`m`) の誤りを監査し、誤りは直す。監査結果は `docs/data-review.md` に (直した件数・保留の判断)。制作者が古典系 VTuber なので、ここは品質の要。
-2. **今日のお題**: かんたんの先頭に「今日のお題: 〈題材〉×〈気持ち〉」(日付でシード、全員同じ)。タップで Q1〜Q3 が埋まった状態から始まる。X 共有の文面に `#和歌メイカー 今日のお題` を足せる。
+2. **今日のお題**: かんたんの先頭に「今日のお題: 〈題材〉×〈気持ち〉」(日付でシード、全員同じ)。タップで Q1〜Q3 が埋まった状態から始まる。X 共有の文面に `#和歌メーカー 今日のお題` を足せる。
 3. **落款 (らっかん)**: 画像の雅号の下に朱色の角印風 (雅号の先頭 1〜2 字を白抜き、縦書き)。完成画面で ON/OFF (既定 ON、雅号が空なら出さない)。
 4. **フォント切替**: 画像の書体を 明朝 (Shippori Mincho) / 古風な明朝 (Zen Old Mincho) / 行書風 (Google Fonts の Yuji Syuku など、読み込めなければ明朝に戻す) の 3 択。
 5. **PWA**: `manifest.webmanifest` + `sw.js` (network-first、kobun_app と同じ方針。`bump-version` が sw の CACHE_VERSION も更新)。ホーム画面に追加できる。アイコンは `assets/icon-192.png` / `icon-512.png` (render.js と同じ朱の短冊マークを Canvas で生成)。
@@ -562,7 +562,7 @@ window.WAKA.easy = {
 
 ## 13. 第 6 弾: 「ことば」の選択 (現代のことばも混ぜる) と ホーム (ユーザー要望 2026-11-01)
 
-ユーザー: 「現代の言葉も、かんたんで選んでいく中の選択肢で『現代の言葉も使う』と選べるようにするのはどう？」「『和歌メイカー』を押すとホームに戻る形にできるといいよね」。
+ユーザー: 「現代の言葉も、かんたんで選んでいく中の選択肢で『現代の言葉も使う』と選べるようにするのはどう？」「『和歌メーカー』を押すとホームに戻る形にできるといいよね」。
 確認の結果、前者は **できる歌に現代語 (口語) の句を混ぜられる** 意味 (入力を現代語にする「ふだんの言葉から」とは別。そちらは現状のまま)。
 
 ### 13.1 質問 4「ことば」(js/view-easy.js)
@@ -606,7 +606,7 @@ window.WAKA.easy = {
 
 ### 13.4 ホーム (js/app.js・js/view-easy.js)
 
-- ヘッダーの「和歌メイカー」(`.brand`) を押すと、どの画面からでも **かんたんの最初の質問 (1/4)** に戻る。
+- ヘッダーの「和歌メーカー」(`.brand`) を押すと、どの画面からでも **かんたんの最初の質問 (1/4)** に戻る。
   - view-easy が `W.views.easy.home()` を公開: `stage = 'input'`、`entry = 'ask'`、`step = 1`、`askMsg` を消す。季節・題材・気持ち・ことば の選択は保持 (ステッパーに見える)。候補・作りかけ (`cands`・`work`) は **消さない**。描画中なら draw。保存する。
   - ホーム (1/4) に `work` か `cands` が残っていれば、今日のお題の下に小さなカード `.resume-card`「作りかけの一首があります → つづきから」。タップで work があれば finish、なければ cands へ。新しく候補を作れば上書きされる (いままでと同じ)。「はじめから作る」(仕上げ) は従来どおり cands/work を消す。
   - app.js: `.brand` の click で preventDefault → `home()` → いまのルートが easy でなければ `location.hash = '#/easy'`、同じなら `show()`。かんたんタブ (`[data-route=easy]`) も、すでに #/easy のときは同じ扱い (タブの href はそのまま)。

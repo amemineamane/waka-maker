@@ -3,35 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>和歌メイカー｜えらぶだけで和歌が一首、縦書き画像で共有</title>
+<title>和歌メーカー｜えらぶだけで和歌が一首、縦書き画像で共有</title>
 <meta name="description" content="質問に答えるだけで和歌（五・七・五・七・七）が一首できる無料サイト。句ごとの言いかえ、音数の自動カウント、短冊・色紙の縦書き画像で X に共有。今日のお題・作品帳つき。">
 <meta name="theme-color" content="#f6f1e7">
 <link rel="canonical" href="https://amemineamane.github.io/waka-maker/">
 <!-- ホーム画面に追加（PWA）。sw.js は js/app.js が http(s) のときだけ登録する -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="和歌メイカー">
+<meta name="apple-mobile-web-app-title" content="和歌メーカー">
 <!-- OGP（SNS は JS を実行しないので data/site.js の値を直書き） -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="和歌メイカー">
-<meta property="og:title" content="和歌メイカー — えらぶだけで、和歌が一首">
+<meta property="og:site_name" content="和歌メーカー">
+<meta property="og:title" content="和歌メーカー — えらぶだけで、和歌が一首">
 <meta property="og:description" content="えらぶだけで和歌が一首。音数を数えて、短冊・色紙の縦書き画像にして X で共有できる無料サイト。">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:url" content="https://amemineamane.github.io/waka-maker/">
 <meta property="og:image" content="https://amemineamane.github.io/waka-maker/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="和歌メイカー 縦書きの和歌のカード">
+<meta property="og:image:alt" content="和歌メーカー 縦書きの和歌のカード">
 <meta name="twitter:image" content="https://amemineamane.github.io/waka-maker/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@AmemineAmane">
-<meta name="twitter:title" content="和歌メイカー — えらぶだけで、和歌が一首">
+<meta name="twitter:title" content="和歌メーカー — えらぶだけで、和歌が一首">
 <meta name="twitter:description" content="えらぶだけで和歌が一首。音数を数えて、短冊・色紙の縦書き画像にして X で共有できる無料サイト。">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "和歌メイカー",
+  "name": "和歌メーカー",
   "url": "https://amemineamane.github.io/waka-maker/",
   "description": "質問に答えるだけで和歌（五・七・五・七・七）が一首できる無料サイト。句ごとの言いかえ、音数の自動カウント、短冊・色紙の縦書き画像で X に共有。今日のお題・作品帳つき。",
   "inLanguage": "ja",
@@ -53,13 +53,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="css/app.css?v=12">
+<link rel="stylesheet" href="css/app.css?v=13">
 </head>
 <body>
 <a class="skip" href="#app">本文へ</a>
 <header class="site-header">
   <div class="header-inner">
-    <a class="brand" href="#/easy"><span class="brand-mark" aria-hidden="true"></span><span data-site-name>和歌メイカー</span></a>
+    <a class="brand" href="#/easy"><span class="brand-mark" aria-hidden="true"></span><span data-site-name>和歌メーカー</span></a>
     <nav class="nav" aria-label="メニュー"><div class="nav-tabs" role="tablist" aria-label="作り方・作品帳・みんなの和歌">
       <a class="nav-item" href="#/easy" data-route="easy" role="tab" aria-selected="false" aria-controls="app"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6.6" r="2.9"/><circle cx="17.1" cy="10.3" r="2.9"/><circle cx="15.2" cy="16.3" r="2.9"/><circle cx="8.8" cy="16.3" r="2.9"/><circle cx="6.9" cy="10.3" r="2.9"/><circle cx="12" cy="12" r="1.2"/></svg><span>かんたん</span></a>
       <a class="nav-item" href="#/mix" data-route="mix" role="tab" aria-selected="false" aria-controls="app"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3c5 0 5 10 10 10h3M17 14l3 3-3 3M4 17h3c1.5 0 2.5-1 3.5-2.5M13.5 9.5C14.5 8 15.5 7 17 7h3M17 4l3 3-3 3"/></svg><span>シャッフル</span></a>
@@ -77,34 +77,34 @@
 
 <footer class="site-footer">
   <p><a href="#/help">使い方</a>　<a href="#/terms">利用規約・プライバシー</a></p>
-  <p class="muted small"><span data-site-name>和歌メイカー</span>　<span id="footer-credit"></span></p>
+  <p class="muted small"><span data-site-name>和歌メーカー</span>　<span id="footer-credit"></span></p>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <!-- データ → 部品 → 画面 → 起動 の順（file:// で動くよう fetch / module は使わない） -->
-<script src="data/site.js?v=12"></script>
-<script src="data/words.js?v=12"></script>
-<script src="data/makura.js?v=12"></script>
-<script src="data/parts.js?v=12"></script>
-<script src="data/samples.js?v=12"></script>
-<script src="data/readings.js?v=12"></script>
-<script src="data/easy.js?v=12"></script>
-<script src="data/easy-modern.js?v=12"></script>
-<script src="js/mora.js?v=12"></script>
-<script src="js/reading.js?v=12"></script>
-<script src="js/store.js?v=12"></script>
-<script src="js/components.js?v=12"></script>
-<script src="js/render.js?v=12"></script>
-<script src="js/share.js?v=12"></script>
-<script src="js/easy-gen.js?v=12"></script>
-<script src="js/view-easy.js?v=12"></script>
-<script src="js/view-compose.js?v=12"></script>
-<script src="js/view-mix.js?v=12"></script>
-<script src="js/view-gallery.js?v=12"></script>
-<script src="js/view-minna.js?v=12"></script>
-<script src="js/view-help.js?v=12"></script>
-<script src="js/view-terms.js?v=12"></script>
-<script src="js/app.js?v=12"></script>
+<script src="data/site.js?v=13"></script>
+<script src="data/words.js?v=13"></script>
+<script src="data/makura.js?v=13"></script>
+<script src="data/parts.js?v=13"></script>
+<script src="data/samples.js?v=13"></script>
+<script src="data/readings.js?v=13"></script>
+<script src="data/easy.js?v=13"></script>
+<script src="data/easy-modern.js?v=13"></script>
+<script src="js/mora.js?v=13"></script>
+<script src="js/reading.js?v=13"></script>
+<script src="js/store.js?v=13"></script>
+<script src="js/components.js?v=13"></script>
+<script src="js/render.js?v=13"></script>
+<script src="js/share.js?v=13"></script>
+<script src="js/easy-gen.js?v=13"></script>
+<script src="js/view-easy.js?v=13"></script>
+<script src="js/view-compose.js?v=13"></script>
+<script src="js/view-mix.js?v=13"></script>
+<script src="js/view-gallery.js?v=13"></script>
+<script src="js/view-minna.js?v=13"></script>
+<script src="js/view-help.js?v=13"></script>
+<script src="js/view-terms.js?v=13"></script>
+<script src="js/app.js?v=13"></script>
 </body>
 </html>

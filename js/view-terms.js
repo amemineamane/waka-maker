@@ -19,7 +19,7 @@
 
   function render(container) {
     var site = W.site || {};
-    var name = site.name || '和歌メイカー';
+    var name = site.name || '和歌メーカー';
     var owner = (site.author && site.author.name) || '制作者';
     var ga = site.analytics && site.analytics.ga4;
     container.innerHTML = '';
