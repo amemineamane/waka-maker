@@ -715,3 +715,84 @@ button.fill-head { cursor: pointer; }
 @media (min-width: 720px) {
   .words-grid { max-width: 560px; }
 }
+
+/* =====================================================================
+ * 第 7 弾（DESIGN 14）: みんなの和歌
+ * ===================================================================== */
+/* 下タブは 5 つ（minna.api が空なら 4 つ）。hidden のタブは場所を取らない */
+.nav { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.nav-item[hidden] { display: none; }
+.nav-item > span { white-space: nowrap; }
+
+.mn-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: -6px 0 12px; }
+.mn-toggle { gap: .5rem; }
+.mn-toggle-box { width: 16px; height: 16px; border: 1.5px solid var(--ink-2); border-radius: 2px; background: #fff; flex: none; }
+.mn-toggle[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.mn-toggle[aria-pressed="true"] .mn-toggle-box { background: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 2px #fff; }
+.mn-status:empty { display: none; }
+.mn-loading { margin: 0 0 8px; }
+.mn-error {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: .6rem .8rem;
+  background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: var(--radius);
+}
+.mn-error p { margin: 0; flex: 1 1 14em; font-size: .9rem; }
+
+.mn-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.mn-card {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px 14px 12px;
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.mn-card.is-mine { border-left: 3px solid var(--accent); }
+.mn-poem-wrap { display: flex; justify-content: center; padding: 6px 0 4px; cursor: pointer; }
+.mn-poem { font-size: 1.15rem; min-height: 8em; }
+.mn-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .8rem; margin: 0; font-size: .82rem; color: var(--ink-2); }
+.mn-author { font-family: var(--mincho); font-weight: 700; font-size: .95rem; color: var(--ink); }
+.mn-odai { font-size: .74rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 0 .4em; letter-spacing: .04em; }
+.mn-mine { font-size: .74rem; border: 1px dashed var(--ink-2); border-radius: 3px; padding: 0 .4em; }
+.mn-mean summary { list-style: none; display: inline-flex; align-items: center; gap: .35rem; min-height: 44px; cursor: pointer; font-size: .85rem; color: var(--accent); }
+.mn-mean summary::-webkit-details-marker { display: none; }
+.mn-mean summary::before { content: "＋"; font-weight: 700; }
+.mn-mean[open] summary::before { content: "－"; }
+.mn-mean p { margin: 0 0 4px; font-size: .88rem; line-height: 1.6; overflow-wrap: anywhere; }
+.mn-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 4px; }
+.mn-act { flex: 1 1 auto; padding: .35rem .7rem; font-size: .9rem; }
+.mn-withdraw { color: var(--accent); }
+.mn-more-box { display: flex; justify-content: center; margin-top: 16px; }
+.mn-more-box:empty { display: none; }
+.mn-more { min-width: 12em; }
+.mn-empty { grid-column: 1 / -1; }
+
+/* 読み込み中の骨組み */
+.mn-skel { align-items: center; min-height: 250px; }
+.mn-skel-poem { display: flex; flex-direction: row-reverse; gap: 14px; padding: 8px 0; }
+.mn-skel-poem i { display: block; width: 14px; height: 140px; background: var(--paper-3); border-radius: 2px; }
+.mn-skel-poem i:nth-child(2n) { margin-top: 20px; height: 120px; }
+.mn-skel-line { width: 50%; height: 12px; margin-top: 10px; background: var(--paper-3); border-radius: 2px; }
+.mn-skel > * { animation: mn-pulse 1.4s ease-in-out infinite; }
+@keyframes mn-pulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .mn-skel > * { animation: none; } }
+
+/* 準備中 */
+.mn-soon-title { margin: 0 0 .3rem; font-family: var(--mincho); font-weight: 700; font-size: 1.2rem; }
+.mn-soon .btn { margin-top: .6rem; }
+
+/* 完成画面の「みんなの和歌に投稿」と確認 */
+.finish-minna { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: -4px 0 14px; }
+.minna-post { flex: 1 1 100%; border-color: var(--ink-2); font-weight: 700; }
+.minna-post[disabled] { opacity: 1; background: var(--paper-3); color: var(--ink-2); font-weight: 400; cursor: default; }
+.finish-actions > .btn-trace { grid-column: 1 / -1; }
+.minna-see { display: inline-flex; align-items: center; min-height: 44px; font-size: .9rem; }
+.minna-see[hidden] { display: none; }
+.minna-confirm p { margin: 0 0 .7rem; line-height: 1.7; }
+.minna-confirm .btn-row { margin-top: 1rem; }
+
+@media (max-width: 719px) {
+  .nav-item { font-size: .68rem; }   /* 5 つで 360 幅に収まるよう 10〜11px */
+}
+@media (min-width: 560px) {
+  .mn-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 720px) {
+  .nav-item { padding: 0 .6rem; }
+  .mn-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

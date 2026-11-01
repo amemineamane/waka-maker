@@ -10,6 +10,7 @@
  *   waka.prefs   設定 { author, layout, palette, meaningInImage, introSeen }
  *                introSeen = かんたんの「はじめての案内」を閉じた
  *                font = 画像の書体（render.fonts の id）、seal = 落款を押す（既定 true）
+ *                minnaAgreed = みんなの和歌への投稿の確認に同意した（2 回目から確認を省く、DESIGN 14.2）
  * 保存失敗（容量超過・プライベートモード）は false を返し、トーストで知らせる。
  * localStorage がそもそも使えない環境（Safari のプライベート・保存を禁止した設定など）では、
  * ページを開いている間だけメモリに置き、最初の 1 回だけ「この環境では保存できません」と出す（DESIGN 12-9）。
@@ -90,7 +91,7 @@
     get: function () {
       var p = read('waka.prefs', {}) || {};
       return { author: p.author || '', layout: p.layout || 'tanzaku', palette: p.palette || 'washi', meaningInImage: p.meaningInImage === true,
-        introSeen: p.introSeen === true, font: p.font || 'shippori', seal: p.seal !== false };
+        introSeen: p.introSeen === true, font: p.font || 'shippori', seal: p.seal !== false, minnaAgreed: p.minnaAgreed === true };
     },
     set: function (patch) {
       var p = S.prefs.get();

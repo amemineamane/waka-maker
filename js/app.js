@@ -1,8 +1,9 @@
 /* =====================================================================
  * js/app.js — 起動・ルーティング・画面切替
  * ---------------------------------------------------------------------
- * すべての script の最後に読む。ハッシュ（#/easy #/mix #/compose #/gallery
+ * すべての script の最後に読む。ハッシュ（#/easy #/mix #/compose #/gallery #/minna
  * #/help #/terms）で WAKA.views の画面を切り替える。既定は #/easy（かんたん）。
+ * みんなの和歌のタブ（data-route=minna）は data/site.js の minna.api が空なら hidden（DESIGN 14.2）。
  * data/site.js に GA4 の ID があるときだけ gtag を読み込む。
  * http(s) で開いたときだけ Service Worker（sw.js、network-first）を登録する。file:// では登録しない。
  * localStorage が使えない環境では最初に 1 度だけ「この環境では保存できません」と出す（store.js）。
@@ -13,7 +14,7 @@
   'use strict';
 
   var W = window.WAKA = window.WAKA || {};
-  var ROUTES = ['easy', 'compose', 'mix', 'gallery', 'help', 'terms'];
+  var ROUTES = ['easy', 'compose', 'mix', 'gallery', 'minna', 'help', 'terms'];
   var current = null;
   // トップの <title>（index.html の <title> と同じ文面）
   var TOP_TITLE = document.title || '和歌メイカー';
@@ -103,6 +104,9 @@
 
     // ヘッダー・フッターのサイト名
     [].forEach.call(document.querySelectorAll('[data-site-name]'), function (n) { n.textContent = W.site.name; });
+    // みんなの和歌: 受け口（minna.api）が無ければタブを出さない（直接開くと「準備中です」）
+    var minnaOn = !!(W.minna && typeof W.minna.enabled === 'function' && W.minna.enabled());
+    [].forEach.call(document.querySelectorAll('[data-route="minna"]'), function (a) { a.hidden = !minnaOn; });
     var credit = document.getElementById('footer-credit');
     if (credit && W.site.author && W.site.author.name) credit.textContent = '© ' + W.site.author.name;
 

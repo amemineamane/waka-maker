@@ -11,13 +11,15 @@
  *   （skipWaiting。読んでいる途中の画面の中身が入れ替わることはない）。
  * 【対象】
  *   同じオリジンの GET だけ。Google Fonts・kuromoji（jsDelivr、辞書が大きい）・解析は素通し。
+ *   みんなの和歌の受け口（script.google.com → script.googleusercontent.com、DESIGN 14）も
+ *   キャッシュせずそのまま通す（一覧は常に新しいものを、投稿の POST はもともと対象外）。
  * 【file:// では動かない】
  *   Service Worker は http/https でしか登録できない。js/app.js が protocol を見て登録しない。
  * ===================================================================== */
 'use strict';
 
 /* tools/bump-version.mjs が書き換える行（形を変えないこと） */
-const CACHE_VERSION = '8';
+const CACHE_VERSION = '9';
 const CACHE_NAME = 'waka-maker-v' + CACHE_VERSION;
 
 /* インストール時に取っておくファイル（?v= は付けない。照合は ignoreSearch）。ファイルを足したらここにも足す */
@@ -45,6 +47,7 @@ const PRECACHE = [
   './js/view-compose.js',
   './js/view-mix.js',
   './js/view-gallery.js',
+  './js/view-minna.js',
   './js/view-help.js',
   './js/view-terms.js',
   './js/app.js',
@@ -81,6 +84,7 @@ self.addEventListener('fetch', function (event) {
   if (req.method !== 'GET') return;
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
+  if (/(^|\.)script\.google(usercontent)?\.com$/.test(url.hostname)) return;   // みんなの和歌の API は素通し
   if (url.origin !== self.location.origin) return;   // 外部（フォント・kuromoji・解析）は素通し
   event.respondWith(networkFirst(req));
 });

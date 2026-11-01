@@ -11,6 +11,7 @@
  *   ui.kuRow(opts)                1 句の入力行（本文・読み・枡）。手作り・かんたんで共用
  *   ui.finish(poem, opts)         完成画面（プレビュー直下に 画像を保存・X で共有、その下にコピー・作品帳・意味・画像設定）
  *   ui.poemLine(poem)             5 句を全角スペースで 1 行に
+ *   ui.tatePoem(ku, cls)          CSS 縦書きの一首（かんたんの候補・仕上げ、みんなの和歌の一覧で共用）
  * 画像と共有は WAKA.render / WAKA.share（別担当）を呼ぶ。無ければボタンを無効化する。
  * ===================================================================== */
 (function () {
@@ -309,6 +310,13 @@
     return poem.ku.map(function (s) { return String(s || '').trim(); }).filter(Boolean).join('　');
   };
 
+  // CSS 縦書きの一首（散らし書き風。2・4 句目を少し下げる）。空の句は全角空白で場所だけ取る
+  ui.tatePoem = function (ku, cls) {
+    return el('div', { class: 'tate-poem' + (cls ? ' ' + cls : ''), lang: 'ja' }, ku.map(function (s, i) {
+      return el('p', { class: 'tate-line l' + (i + 1), text: String(s || '').trim() || '　' });
+    }));
+  };
+
   /* ---------- 画像・共有 API（別担当）の窓口 ---------- */
   // 使う API（js/render.js・js/share.js、DESIGN 3.5/3.6）:
   //   render.draw(canvas, poem, opts) -> Promise / render.download(canvas) -> Promise<'download'|'tab'|'failed'>
@@ -338,6 +346,11 @@
   // opts.editingId: 上書き保存先 / opts.onSaved(item) / opts.onEdit() / opts.onDelete()
   // opts.onMeaning(text): 意味・ひとことを書きかえたとき / opts.onClose(): 閉じたとき
   // opts.odai: 今日のお題から作った歌（X 共有の下に「今日のお題として投稿」チェック、既定オン）
+  // opts.odaiDate: そのお題の日付（'YYYY-MM-DD'。みんなの和歌への投稿の odai に使う。無ければ今日）
+  // opts.readOnly: 閲覧モード（みんなの和歌の歌、DESIGN 14.2）。画像保存・X 共有・本文コピーと
+  //   「自分の作品帳に写す」だけ。自動保存しない・意味は読むだけ・投稿ボタンは出さない。雅号と落款は poem.author（投稿者）
+  // opts.onTrace(): 閲覧モードの「なぞる（じっくりで書く）」
+  // みんなの和歌への投稿（W.minna が有効なときだけ、閲覧モード以外）: 主ボタンの下・「そのほかの操作」の上
   // 書体（waka.prefs.font）は「そのほかの操作」の中、落款（waka.prefs.seal、既定オン）は かたち・いろ の下
   // 意味・ひとこと（DESIGN 10.2）: 初期値は poem.meaning（かんたん・シャッフルは自動の大意、じっくりは空）。
   //   「画像に意味を入れる」（waka.prefs.meaningInImage、既定オフ）なら render に meaning を渡す（短冊は描かない）。
@@ -446,13 +459,13 @@
       if (!item) return null;
       var res = { item: item, was: !!id };
       savedId = item.id;
-      if (saveBtn) saveBtn.textContent = '作品帳に上書き保存';
+      if (saveBtn && !opts.readOnly) saveBtn.textContent = '作品帳に上書き保存';
       if (opts.onSaved) opts.onSaved(item);
       return res;
     }
     // 画像を保存・画像つき共有のあとに作品帳へ自動で入れる（新しく作った歌だけ）
     function autoSave() {
-      if (opts.mode === 'gallery') return '';
+      if (opts.mode === 'gallery' || opts.readOnly) return '';
       var r = persist();
       return r && !r.was ? '。作品帳にも入れました' : '';
     }
@@ -487,7 +500,14 @@
     }, '', has(Sh, 'copyText'));
 
     var handle;
-    if (opts.mode === 'gallery') {
+    if (opts.readOnly) {
+      // みんなの和歌の歌を自分の作品帳へ（同じ本文・読み・雅号の歌があればそれを更新）
+      saveBtn = addBtn('自分の作品帳に写す', function () {
+        var r = persist();
+        if (r) ui.toast(r.was ? '作品帳の同じ歌を更新しました' : '作品帳に写しました', 'ok');
+      }, 'btn-save');
+      if (opts.onTrace) addBtn('なぞる（じっくりで書く）', function () { handle.close(); opts.onTrace(); }, 'btn-ghost btn-trace');
+    } else if (opts.mode === 'gallery') {
       addBtn('編集する', function () { handle.close(); if (opts.onEdit) opts.onEdit(); });
       actions.appendChild(ui.twoStep('削除', 'もう一度押すと削除', function () {
         handle.close(); if (opts.onDelete) opts.onDelete();
@@ -524,6 +544,7 @@
       'aria-label': '意味・ひとこと'
     });
     meanInput.value = data.meaning;
+    if (opts.readOnly) { meanInput.readOnly = true; meanInput.placeholder = '（なし）'; }
     var meanNote = el('p', { class: 'meaning-note small muted' });
     function paintMeanNote() {
       meanNote.textContent = state.meaningInImage && state.layout === 'tanzaku' ? '短冊の画像には意味は入りません（色紙・横長で入ります）' : '';
@@ -551,12 +572,51 @@
     ]);
     paintMeanNote();
 
+    /* みんなの和歌に投稿（DESIGN 14.2）。送信・確認・記録は W.minna（js/view-minna.js） */
+    var M = W.minna;
+    var minnaBox = null;
+    if (!opts.readOnly && M && typeof M.enabled === 'function' && M.enabled()) {
+      var sending = false;
+      var postBtn = el('button', { type: 'button', class: 'btn minna-post' });
+      var seeLink = el('a', { class: 'minna-see', href: '#/minna', text: 'みんなの和歌を見る' });
+      var paintPost = function () {
+        var posted = M.isPosted({ ku: data.ku, savedId: savedId });
+        postBtn.disabled = sending || posted;
+        postBtn.textContent = sending ? '投稿しています…' : posted ? '投稿済み' : 'みんなの和歌に投稿';
+        seeLink.hidden = !posted;
+      };
+      var send = function () {
+        var odai = '';
+        if (opts.odai && (!odaiCheck || odaiCheck.checked)) odai = opts.odaiDate || (W.easyGen && W.easyGen.jstDate ? W.easyGen.jstDate() : '');
+        sending = true; paintPost();
+        M.post({ ku: data.ku, kana: data.kana, author: data.author, meaning: data.meaning.trim(), odai: odai, savedId: savedId }).then(function () {
+          sending = false; paintPost();
+          ui.toast('投稿しました', 'ok');
+          try { seeLink.focus({ preventScroll: true }); } catch (e) {}
+        }, function (err) {
+          sending = false; paintPost();
+          ui.toast(M.errorText(err, 'post'), 'error');
+          try { postBtn.focus({ preventScroll: true }); } catch (e) {}
+        });
+      };
+      postBtn.addEventListener('click', function () {
+        if (sending) return;
+        var problem = M.checkPoem(data);
+        if (problem) { ui.toast(problem, 'error'); return; }
+        if (W.store.prefs.get().minnaAgreed) send();
+        else M.confirm(function () { W.store.prefs.set({ minnaAgreed: true }); send(); });
+      });
+      paintPost();
+      minnaBox = el('div', { class: 'finish-minna' }, [postBtn, seeLink]);
+    }
+
     var body = el('div', { class: 'finish' }, [
       preview,
       el('div', { class: 'finish-side' }, [
         canDraw ? null : el('p', { class: 'note center', text: '画像の部品が読み込まれていないため、簡易表示です。' }),
         mainActions,
         odaiRow,
+        minnaBox,
         el('p', { class: 'finish-sub-title', text: 'そのほかの操作' }),
         actions,
         fontRow,

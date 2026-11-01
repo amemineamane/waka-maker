@@ -12,5 +12,7 @@ window.WAKA.site = {
     youtube: 'https://www.youtube.com/@AmemineAmane',
     booth: 'https://amemineamane.booth.pm/'
   },
-  analytics: { ga4: '' }
+  analytics: { ga4: '' },
+  // みんなの和歌（DESIGN 14）。GAS ウェブアプリの /exec の URL。空ならタブも投稿ボタンも出さない
+  minna: { api: '' }
 };

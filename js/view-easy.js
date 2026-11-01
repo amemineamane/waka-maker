@@ -195,12 +195,8 @@
     return b;
   }
 
-  // CSS 縦書きの一首（候補カード・仕上げのプレビュー）
-  function tatePoem(ku, cls) {
-    return el('div', { class: 'tate-poem' + (cls ? ' ' + cls : ''), lang: 'ja' }, ku.map(function (s, i) {
-      return el('p', { class: 'tate-line l' + (i + 1), text: String(s || '').trim() || '　' });
-    }));
-  }
+  // CSS 縦書きの一首（候補カード・仕上げのプレビュー）。みんなの和歌と共用の ui.tatePoem
+  function tatePoem(ku, cls) { return ui.tatePoem(ku, cls); }
 
   function condText(subject, mood, season, words) {
     var s = subjectById(subject), m = moodById(mood);
@@ -631,6 +627,7 @@
       ui.finish({ ku: w.lines.map(function (l) { return l.text; }), kana: w.lines.map(function (l) { return l.kana; }), author: author.value, meaning: finishMeaning() }, {
         mode: 'new', editingId: w.savedId || null,
         odai: !!w.odai && !!W.easyGen.jstDate && w.odai === W.easyGen.jstDate(),
+        odaiDate: w.odai || null,   // みんなの和歌への投稿の odai（今日のときだけ使われる）
         onMeaning: function (v) { w.meaningOwn = { auto: auto, text: v }; saveSoon(); },
         onSaved: function (item) { w.savedId = item.id; save(); }
       });
