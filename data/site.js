@@ -14,5 +14,5 @@ window.WAKA.site = {
   },
   analytics: { ga4: '' },
   // みんなの和歌（DESIGN 14）。GAS ウェブアプリの /exec の URL。空ならタブも投稿ボタンも出さない
-  minna: { api: '' }
+  minna: { api: 'https://script.google.com/macros/s/AKfycbwywXrzL0Su4vKJ9mSL37v0rtIPIyXMkZf2Hn7BCCwpetve-UtU1kN_bNasrsgcO2X5Pg/exec' }
 };
