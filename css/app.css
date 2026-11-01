@@ -198,6 +198,8 @@ details[open] > .panel-summary > span:first-child::before { content: "－"; }
 .kotoba-item {
   display: grid; gap: 1px; text-align: left; padding: .5rem .7rem; min-height: 44px;
   background: #fff; border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer;
+  /* 一覧の外（スクロールで隠れている分）は配置・文字組みを後回しにする（検索のたびの重さ対策） */
+  content-visibility: auto; contain-intrinsic-size: auto 76px;
 }
 .kotoba-item:hover { border-color: var(--accent); }
 .k-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; }
@@ -792,6 +794,10 @@ button.fill-head { cursor: pointer; }
 .minna-see { display: inline-flex; align-items: center; min-height: 44px; font-size: .9rem; }
 .minna-see[hidden] { display: none; }
 .minna-confirm p { margin: 0 0 .7rem; line-height: 1.7; }
+.minna-name-label { display: block; margin: 0 0 .4rem; }
+.minna-name-title { display: block; font-size: .85rem; color: var(--ink-2); margin-bottom: .25rem; }
+.minna-confirm .minna-name { width: 100%; box-sizing: border-box; }
+.minna-confirm p.small { font-size: .8rem; color: var(--ink-2); }
 .minna-confirm .btn-row { margin-top: 1rem; }
 
 @media (max-width: 719px) {

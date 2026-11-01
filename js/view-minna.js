@@ -221,20 +221,31 @@
     return base;
   };
 
-  // 初回の確認（DESIGN 14.2）。「投稿する」で onOk
-  M.confirm = function (onOk) {
+  // 投稿の確認（DESIGN 14.2）。毎回出す。名前（任意）を入れられる。「投稿する」で onOk(name)
+  //   opts = { author: いまの雅号（名前欄の初期値） }
+  M.confirm = function (opts, onOk) {
+    if (typeof opts === 'function') { onOk = opts; opts = {}; }
+    opts = opts || {};
     var okBtn = el('button', { type: 'button', class: 'btn btn-primary minna-ok', text: '投稿する' });
     var noBtn = el('button', { type: 'button', class: 'btn minna-cancel', text: 'やめる' });
+    var name = el('input', {
+      type: 'text', class: 'author-input minna-name', value: String(opts.author || ''), maxlength: '20',
+      placeholder: '空なら「詠み人知らず」', autocomplete: 'off', 'aria-describedby': 'minna-name-note'
+    });
     var h = ui.modal('みんなの和歌に投稿', [
       el('div', { class: 'minna-confirm' }, [
-        el('p', { text: '投稿した歌は、みんなの和歌のページで誰でも見られます。雅号と大意も一緒に出ます。' }),
-        el('p', { text: 'あとで取り下げられます。不適切な投稿は運営が非表示にします。' }),
+        el('label', { class: 'minna-name-label' }, [el('span', { class: 'minna-name-title', text: '名前（任意・20 文字まで）' }), name]),
+        el('p', { class: 'small', id: 'minna-name-note', text: '名前は歌と一緒に表示され、画像の雅号にもなります。名前以外の個人情報は送りません・集めません。' }),
+        el('p', { text: '投稿した歌は、みんなの和歌のページで誰でも見られます（大意も一緒に出ます）。あとで取り下げられます。不適切な投稿は運営が非表示にします。' }),
         el('p', { class: 'small' }, [el('a', { href: '#/terms', text: '利用規約' }), '（みんなの和歌への投稿）']),
         el('div', { class: 'btn-row' }, [okBtn, noBtn])
       ])
     ], { onClose: null });
-    okBtn.addEventListener('click', function () { h.close(); onOk(); });
+    var ok = function () { h.close(); onOk(cut(trim(name.value), 20)); };
+    okBtn.addEventListener('click', ok);
+    name.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
     noBtn.addEventListener('click', function () { h.close(); });
+    try { name.focus({ preventScroll: true }); } catch (e) {}
     return h;
   };
 

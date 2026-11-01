@@ -603,8 +603,17 @@
         if (sending) return;
         var problem = M.checkPoem(data);
         if (problem) { ui.toast(problem, 'error'); return; }
-        if (W.store.prefs.get().minnaAgreed) send();
-        else M.confirm(function () { W.store.prefs.set({ minnaAgreed: true }); send(); });
+        // 毎回、名前（任意）を入れられる確認を出す。名前を変えたら雅号にも反映（画像・落款も）
+        M.confirm({ author: data.author }, function (name) {
+          W.store.prefs.set({ minnaAgreed: true });
+          if (name !== String(data.author || '')) {
+            data.author = name;
+            W.store.prefs.set({ author: name });
+            if (typeof paintSealNote === 'function') paintSealNote();
+            redraw();
+          }
+          send();
+        });
       });
       paintPost();
       minnaBox = el('div', { class: 'finish-minna' }, [postBtn, seeLink]);

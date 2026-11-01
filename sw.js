@@ -19,7 +19,7 @@
 'use strict';
 
 /* tools/bump-version.mjs が書き換える行（形を変えないこと） */
-const CACHE_VERSION = '13';
+const CACHE_VERSION = '14';
 const CACHE_NAME = 'waka-maker-v' + CACHE_VERSION;
 
 /* インストール時に取っておくファイル（?v= は付けない。照合は ignoreSearch）。ファイルを足したらここにも足す */
@@ -38,6 +38,7 @@ const PRECACHE = [
   './data/easy-modern.js',
   './js/mora.js',
   './js/reading.js',
+  './js/reading-worker.js',
   './js/store.js',
   './js/components.js',
   './js/render.js',
