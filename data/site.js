@@ -4,7 +4,7 @@ window.WAKA.site = {
   name: '和歌メーカー',
   url: 'https://amemineamane.github.io/waka-maker/',
   description: '質問に答えるだけで和歌（五・七・五・七・七）が一首できる無料サイト。句ごとの言いかえ、音数の自動カウント、短冊・色紙の縦書き画像で X に共有できます',
-  hashtags: ['和歌メーカー'],
+  hashtags: ['雨峰和歌', '和歌メーカー'],  // 常につける (先頭が主タグ)。お題は components.js の ODAI_TAG
   author: {
     name: '雨峰あまね',
     role: 'ほんのり古典系 VTuber',
