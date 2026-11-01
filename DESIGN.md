@@ -600,3 +600,39 @@ window.WAKA.easy = {
   - ホーム (1/4) に `work` か `cands` が残っていれば、今日のお題の下に小さなカード `.resume-card`「作りかけの一首があります → つづきから」。タップで work があれば finish、なければ cands へ。新しく候補を作れば上書きされる (いままでと同じ)。「はじめから作る」(仕上げ) は従来どおり cands/work を消す。
   - app.js: `.brand` の click で preventDefault → `home()` → いまのルートが easy でなければ `location.hash = '#/easy'`、同じなら `show()`。かんたんタブ (`[data-route=easy]`) も、すでに #/easy のときは同じ扱い (タブの href はそのまま)。
 - 既存の「再訪時はその段階から再開」は変えない (ロゴを押したときだけホームへ)。
+
+## 14. 第 7 弾: みんなの和歌 `#/minna` (ユーザー要望 2026-11-01「みんなが作った和歌がどんどん集まるページ」)
+
+GitHub Pages は静的なので、投稿の受け口は **Google スプレッドシート + Apps Script (GAS) のウェブアプリ** にする (ユーザー決定。Rita Custom Match と同じ方式)。1 章の「外部通信は Google Fonts と kuromoji だけ」の **例外** として、この機能に限り `data/site.js` の `minna.api` (GAS の /exec URL) へ fetch する。`minna.api` が空ならタブを出さず、完成画面の投稿ボタンも出さない (file:// でも、API 未設定でも壊れない)。投稿は押した人だけ (勝手に集めない)。
+
+### 14.1 API (GAS 側 `gas/Code.gs`、ファイルはリポジトリに置く。秘密は持たない)
+
+共通: すべて HTTP 200 の JSON (GAS はステータスを変えられない)。失敗は `{ok:false, error:'invalid'|'ng'|'rate'|'dup'|'notfound'|'forbidden'|'server'}`。POST は **プリフライトを避ける**ため `fetch(api, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(req), redirect:'follow'})` (GAS は 302 で script.googleusercontent.com へ飛ぶ)。GET はクエリ。
+
+- `GET ?action=list&limit=30[&odai=YYYY-MM-DD][&before=<createdAt ms>]` → `{ok:true, items:[{id, ku:[5], kana:[5], author, meaning, odai, createdAt}], more:bool}`。createdAt 降順、hidden を除く。limit は 1〜50。`odai` を付けるとその日付のお題の投稿だけ。list は CacheService で 20 秒キャッシュ (投稿・削除で破棄)。
+- `POST {action:'post', ku:[5], kana:[5], author, meaning, odai, client}` → `{ok:true, id, deleteToken}`。
+  - 検査: ku は 5 本、各 1〜15 文字、改行・`http`・`://` を含まない。kana は 5 本、空か仮名 (ひらがな・カタカナ・ー) のみ 1〜20 文字。author 0〜20 文字、meaning 0〜200 文字、odai は `YYYY-MM-DD` か空、client は 8〜64 文字の英数。前後の空白は落とす。
+  - NG ワード: シート `ng` の A 列 (部分一致、ku・author・meaning に対して) → `error:'ng'`。
+  - 連投: CacheService `rl:<client>` 20 秒に 1 回、全体 `rl:all` 1 分 30 回 → `error:'rate'`。
+  - 重複: 直近 300 行に同じ ku (結合して比較) があれば `error:'dup'`。
+  - id は `Utilities.getUuid()`、deleteToken は乱数 32 文字で、シートには SHA-256 の hex だけ保存。
+- `POST {action:'delete', id, deleteToken}` → `{ok:true}`。hash が合えば hidden=1 にする (行は消さない)。合わなければ `forbidden`、無ければ `notfound`。
+- シート `posts` の列: `id, createdAt, ku1..ku5, kana1..kana5, author, meaning, odai, hidden, client, deleteHash`。先頭行は見出し。初回アクセス時に無ければ作る (`ng` シートも)。**管理は hidden 列に 1 を書くだけ** (非表示)。シートを直接編集しても list キャッシュは 20 秒で追いつく。
+- `doGet` の `action=ping` → `{ok:true, version:1, count:<表示中の件数>}` (設置確認用)。
+- `docs/minna-setup.md`: 設置手順 (新しいスプレッドシート → 拡張機能 → Apps Script → Code.gs を貼る → デプロイ → 新しいデプロイ → 種類 ウェブアプリ、実行ユーザー 自分、アクセス 全員 → URL をコピー → data/site.js の `minna.api` に貼る)、更新のしかた (コードを変えたら「デプロイを管理 → 新バージョン」)、管理のしかた (hidden に 1 / ng シート)、注意 (URL は公開されてよいが、スプレッドシート自体は共有しない)。
+
+### 14.2 サイト側
+
+- `data/site.js` に `minna: { api: '' }` を足す (設置後にユーザーの URL を入れる)。
+- 新しい画面 `js/view-minna.js`、ルート `#/minna`、タブ「みんな」(下タブ 5 つ目、作品帳の右。アイコンは人が 3 人程度の線画。5 つでスマホ 360 幅に収まるよう文字 10〜11px)。`minna.api` が空ならタブを `hidden` にし、直接 `#/minna` を開いたら「準備中です」。
+- 一覧: 縦書きカード (view-easy の `.tate-poem` を components.js に出して共用) を新着順。カード下に 雅号 (空なら「詠み人知らず」)・日付 (M月D日)・お題の印 (odai があれば「今日のお題 M/D」)・大意 (あれば折りたたみ)。上に「今日のお題だけ」のトグル (今日の日付の odai で絞る) と「更新」。「もっと見る」で `before` を使って 30 件ずつ。読み込み中はカードの骨組み、失敗したら「読み込めませんでした。もう一度」。最後に取れた一覧は `waka.minna.cache` (最大 60 件) に置き、次回はそれを先に出してから更新する。
+- カードのタップで「画像にする」(ui.finish を **閲覧モード** で: 画像保存・X 共有・本文コピーはでき、作品帳保存は「自分の作品帳に写す」として可。雅号は投稿者のもの、落款は投稿者の雅号) と「なぞる」(じっくりへ下書きとして渡す。雅号は自分の prefs.author)。
+- 投稿: 完成画面 (`ui.finish`) の「そのほかの操作」の上に「みんなの和歌に投稿」ボタン (`minna.api` があるときだけ)。初回は確認モーダル (「投稿した歌は、みんなの和歌のページで誰でも見られます。雅号と大意も一緒に出ます。あとで取り下げられます。不適切な投稿は運営が非表示にします。利用規約」+「投稿する」「やめる」。2 回目からは `waka.prefs.minnaAgreed` で省略)。送信中はボタンを無効に。成功で「投稿しました」トースト + 「みんなの和歌を見る」リンク、`waka.minna.mine = [{id, deleteToken, postedAt}]` に記録し、同じ歌 (work.savedId か ku 一致) の再投稿はボタンを「投稿済み」に。失敗はトースト (`ng`: 「使えない言葉が含まれています」、`rate`: 「少し待ってからもう一度」、`dup`: 「同じ歌がすでにあります」、その他: 「投稿できませんでした」)。
+  - `client` は `waka.minna.client` (初回に乱数 16 文字を作って保存)。odai は `work.odai` が今日の日付のときだけ。
+- 一覧で自分の投稿 (`waka.minna.mine` にある id) には「取り下げる」(2 段階) → `delete`。
+- NG ワードの軽い前検査はしない (サーバー側に任せる。語の一覧をサイトに置かない)。
+- 規約 (`js/view-terms.js`) に「みんなの和歌への投稿」の節: 公開されること・投稿内容の責任・運営が予告なく非表示にできること・取り下げ方法・保存するのは本文・読み・雅号・大意・お題の日付・端末ごとの識別子だけで IP やアカウントは集めない (GAS 側も記録しない)・著作権は投稿者にあり、サイトは表示と画像化のために使うこと。制定日はそのまま、改定日 2026-11-01 を足す。
+- 使い方 (`js/view-help.js`) に「みんなの和歌」の節 (投稿・取り下げ・画像にする)。
+- `sw.js`: API への fetch はキャッシュしない (network-first の対象外。script.google.com / googleusercontent.com は素通し)。
+- GA がある場合は投稿・取り下げを event として送る (無ければ何もしない)。
+- 配信での使い方 (使い方ページには書かない、README に): `#/minna` を OBS のブラウザソースで開けば視聴者の投稿がそのまま映る。「今日のお題だけ」で絞る。

@@ -194,11 +194,13 @@ const easyLines = [];
   let mJ5 = 0, mC7 = 0;
   const OLD_KANA = /[ゐゑぢ]|(?<!わ)くわ|ふ(?![ぁ-ゖ])/;
   const dupPh = new Set();
+  const classicText = new Set(ph.filter(q => !q.modern).map(q => q.text));
   ph.forEach((p, i) => {
     const tag = `easy.phrases[${i}] ${p.role} 「${p.text}」(${p.kana})`;
     if (!(p.role in ROLE_MORA)) { err(`${tag}: role 不正`); return; }
     roleCount[p.role] = (roleCount[p.role] || 0) + 1;
     const mod = !!p.modern;
+    if (mod && classicText.has(p.text)) err(`${tag}: modern の text が古風の句と同じ (仕上げの「ほかの言い方」で除外される)`);
     if (mod) {
       modRole[p.role] = (modRole[p.role] || 0) + 1;
       if (OLD_KANA.test(p.kana || '')) warn(`${tag}: modern の kana に歴史的かなづかいの疑い`);
@@ -245,14 +247,14 @@ const easyLines = [];
   if (modRole.S5 || modRole.S7 || modRole.M7 || modRole.C7 || modRole.J5) {
     subs.forEach(s => {
       const st = mSubj[s.id];
-      if (st.S5 < 3) err(`easy(modern): 題材 ${s.id} の S5 が ${st.S5} 件 (3 未満)`);
-      if (st.pos3 < 2) err(`easy(modern): 題材 ${s.id} の pos3Ok S5 が ${st.pos3} 件 (2 未満)`);
-      if (st.S7 < 3) err(`easy(modern): 題材 ${s.id} の S7 が ${st.S7} 件 (3 未満)`);
+      if (st.S5 < 5) err(`easy(modern): 題材 ${s.id} の S5 が ${st.S5} 件 (5 未満)`);
+      if (st.pos3 < 3) err(`easy(modern): 題材 ${s.id} の pos3Ok S5 が ${st.pos3} 件 (3 未満)`);
+      if (st.S7 < 5) err(`easy(modern): 題材 ${s.id} の S7 が ${st.S7} 件 (5 未満)`);
     });
     moods.forEach(m => {
       const st = mMood[m.id];
-      if (st.M7 < 5) err(`easy(modern): 気持ち ${m.id} の M7 が ${st.M7} 件 (5 未満)`);
-      if (st.C7 < 3) err(`easy(modern): 気持ち ${m.id} の C7 が ${st.C7} 件 (3 未満)`);
+      if (st.M7 < 7) err(`easy(modern): 気持ち ${m.id} の M7 が ${st.M7} 件 (7 未満)`);
+      if (st.C7 < 5) err(`easy(modern): 気持ち ${m.id} の C7 が ${st.C7} 件 (5 未満)`);
     });
     if (mJ5 < 25) err(`easy(modern): 汎用 J5 が ${mJ5} 件 (25 未満)`);
     if (mC7 < 20) err(`easy(modern): 汎用 C7 が ${mC7} 件 (20 未満)`);
